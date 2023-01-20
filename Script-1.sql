@@ -506,18 +506,20 @@ WHERE DEPARTMENT_ID IN (10, 30, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180,
 
 SELECT DEPARTMENT_ID 
 FROM EMPLOYEES e 
-WHERE LAST_NAME = 'Austin';
+WHERE LAST_NAME = 'King';
 
 SELECT * FROM DEPARTMENTS d ;
 
+--다중행(Multi-row) 서브쿼리
+ -- 연산자 IN, NOT IN, any, all, exist.
 SELECT LOCATION_ID 
 FROM DEPARTMENTS d 
-WHERE DEPARTMENT_ID =
-(
+WHERE DEPARTMENT_ID IN (
 	SELECT DEPARTMENT_ID 
 	FROM EMPLOYEES e 
-	WHERE LAST_NAME = 'Austin');
-					--이렇게 쓰는 쿼리를 subquery라고 부른다
+	WHERE LAST_NAME = 'King'
+);
+	--이렇게 쓰는 쿼리를 subquery라고 부른다
 
 -- Austin이 근무하는 대륙의 이름을 찾아보자. 단, subquery로
 
