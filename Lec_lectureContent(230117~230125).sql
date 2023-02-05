@@ -1,8 +1,12 @@
+@@ -1,827 +1,9 @@
 --TABLE의 모든 정보를 보기
 SELECT * FROM tab; --hr이 가지고있는 모든(*) tables의 목록을 보여달라는 뜻
+CREATE USER user01 IDENTIFIED BY user01
+DEFAULT TABLESPACE USERS;
 
 --대륙정보
 SELECT * FROM REGIONS; --지역ID(대륙번호)
+GRANT CONNECT, RESOURCE, DBA TO user01;
 
 --국가정보
 SELECT * FROM COUNTRIES; --국가ID, 국가명, 지역ID(대륙번호인듯?)
@@ -825,3 +829,6 @@ VALUES ('Kai', 2, 30, 60);
 
 ROLLBACK;
 DROP TABLE TEST;
+No newline at end of file
+SELECT * FROM ALL_USERS;
+No newline at end of file
