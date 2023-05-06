@@ -1,0 +1,162 @@
+-- 230418Tue
+-- database 선택을 먼저 해야함
+
+use db;
+
+-- 인코딩 설정 db에는 데이터베이스 이름이 들어가야함.
+ALTER DATABASE db
+CHARACTER SET = 'utf8'
+COLLATE = 'utf8_general_ci';
+
+-- 나머지 쿼리문은 유사한점이 많음
+
+-- 몇가지 차이점은 설명
+
+-- Mysql(MariaDB)은 테이블명의 대소문자 구별이 됨.
+-- unix, linux에서는 구별이 되고, 윈도우에서는 구별이 안됨.
+-- 우리가 쓰는 aws는 unix 기반이기 때문에 구별이 된다.
+
+-- Oracle 영어 한글자는 1byte, 한글 한글자는 2~3byte
+-- Mysql은 인코딩 자체가 UTF-8로 되어있음. 즉, 영어 및 한글 한글자의 크기는 같다.
+
+CREATE TABLE TEST(
+	NUM BIGINT AUTO_INCREMENT PRIMARY KEY, -- 정수형은 INT, 더 큰수는 BIGINT
+	NAME VARCHAR(100), -- 고정길이 문자열은 CHAR(255), 가변길이 문자열은 VARCHAR(65532)
+	INFO LONGTEXT, -- CLOB처럼 큰 문자를 담을 때 TEXT(167772111), 더 큰 문자열을 담고싶을 때는 LONGTEXT
+	BIRTH DATE
+)
+
+-- PK의 무결성을 위해 함수 사용(자동증가 함수)
+-- oracle의 sequence와 같은 역할
+-- AUTO_INCREMENT
+
+-- 기타 제약조건은 동일함
+
+SELECT * FROM TEST;
+SELECT * FROM test; -- 대소문자 구별을 하지 않음
+
+-- 자동증가(AUTO_INCREMENT)를 사용하는 세가지 방법
+-- 컬럼을 명시한 경우, NULL을 넣음
+-- 컬럼을 명시하지 않은 경우, 0을 넣음
+-- 컬럼을 명시했지만, AUTO_INCREMENT에 해당하는 컬럼을 생략
+
+-- AUTO_INCREMENT를 사용할거면, 해당 컬럼을 명시한 경우에는 NULL을 넣어주면 된다. 숫자를 넣으면 충돌남)
+-- 현재 시간을 나타내는데는 now()라는 함수를 많이 쓴다. SYSDATE도 가능
+INSERT INTO TEST(NUM, NAME, INFO, BIRTH)
+VALUES(NULL, 'IU', 'Singer', NOW());
+
+-- 공통적 여러 테이블에서 AUTO_INCREMENT를 사용해야 하는 경우, 값을 증가시키는 테이블을 따로 만들고, 해당 테이블의 컬럼값을 가져오는식으로 사용하기도 한다.
+
+-- AUTO_INCREMENT: 컬럼을 명시하지 않은 경우, 0을 사용
+INSERT INTO TEST
+VALUES(0, 'WINTER', 'Group', now());
+
+-- NUM은 어차피 자동증가인데 컬럼을 표기할 필요가 있을까?
+INSERT INTO TEST(NAME, INFO, BIRTH)
+VALUES('CHOA', 'Test', now());
+
+-- TABLE 만들기 연습
+-- BOARD : NOTICE, QNA
+-- 공통: 글번호, 글제목, 글내용, 작성자, 작성일, 조회수
+-- QNA : REF, STEP, DEPTH 추가
+
+-- FILE  : NOTICEFILES, QNAFILES
+-- 공통: 파일번호, 글번호, 저장된파일명, 업로드파일명
+
+
+-- 테이블 삭제
+DROP TABLE NOTICEFILES;
+DROP TABLE QNAFILES;
+DROP TABLE NOTICE;
+DROP TABLE QNA;
+
+SELECT * FROM NOTICE ORDER BY NUM DESC;
+SELECT * FROM NOTICEFILES ORDER BY NUM DESC;
+SELECT * FROM NOTICE WHERE NUM=5;
+
+-- 테이블 데이터 입력 확인
+INSERT INTO NOTICE(NUM, TITLE, CONTENTS, WRITER, REGDATE, HIT)
+VALUES(NULL, '제목', '내용', '작성자', now(), 0);
+
+DELETE FROM NOTICE WHERE NUM=6;
+COMMIT;
+ROLLBACK;
+
+SELECT * FROM NOTICE N
+	LEFT OUTER JOIN
+	NOTICEFILES NF
+	ON(N.NUM=NF.NUM)
+WHERE N.NUM=134;
+
+SELECT * FROM QNA ORDER BY NUM DESC;
+
+SELECT * FROM QNA
+	WHERE WRITER LIKE '%10%'
+	ORDER BY NUM DESC
+	LIMIT 0, 10;
+	
+UPDATE QNA SET REF=120
+WHERE NUM=120;
+
+SELECT * FROM MEMBER;
+SELECT * FROM MEMBER_ROLE;
+SELECT * FROM ROLE;
+UPDATE MEMBER_ROLE SET NUM=1 WHERE USERNAME='user01';
+SELECT * FROM MEMBER WHERE USERNAME='id1';
+
+SELECT USERNAME FROM MEMBER;
+
+COMMIT;
+ROLLBACK;
+UPDATE MEMBER SET LASTTIME=now() WHERE LASTTIME IS NULL;
+UPDATE MEMBER SET LASTTIME="2023-04-23 12:37:00"
+WHERE USERNAME='가입해볼게요';
+
+SELECT * FROM MEMBER;
+SELECT * FROM MEMBER WHERE USERNAME='test1';
+SELECT LASTTIME FROM MEMBER WHERE USERNAME='test1';
+
+SELECT DATE_ADD(now(), interval 3 day);
+SELECT DATEDIFF(now(), (SELECT LASTTIME FROM MEMBER WHERE USERNAME='test1'));
+
+-- DATEDIFF보다 TIMESTAMPDIFF가 좀 더 정확한거같음.
+SELECT TIMESTAMPDIFF(day, (SELECT LASTTIME FROM MEMBER WHERE USERNAME='test1'), now());
+
+UPDATE MEMBER SET ENABLED=0
+WHERE LASTTIME <= DATE_SUB(now(), INTERVAL 3 DAY);
+
+-- 다중행 subquery
+UPDATE MEMBER SET ENABLED=0
+WHERE USERNAME 
+IN 
+	(SELECT USERNAME FROM `MEMBER` WHERE TIMESTAMPDIFF(DAY, LASTTIME, now())>=3);
+
+
+-- 오늘이 생일인 사람 찾기
+SELECT * FROM MEMBER;
+SELECT * FROM NOTICE ORDER BY NUM DESC;
+DELETE FROM NOTICE WHERE NUM=161;
+
+UPDATE MEMBER SET BIRTH="2000-04-26" WHERE USERNAME='del03';
+
+SELECT * FROM MEMBER
+WHERE DATE_FORMAT(BIRTH, '%m%d') = DATE_FORMAT(NOW(), '%m%d');
+
+UPDATE MEMBER SET EMAIL='rhymiahn@naver.com' WHERE USERNAME='id1';
+
+
+-- 생일자들의 이름과 이메일을 가지고 와서 이메일을 보내기... ?
+
+
+
+
+COMMIT;
+SELECT * FROM MEMBER;
+SELECT * FROM MEMBER_ROLE;
+UPDATE MEMBER_ROLE SET NUM=2 WHERE USERNAME='user02';
+DELETE FROM MEMBER WHERE USERNAME='user01';
+DELETE FROM MEMBER_ROLE WHERE USERNAME='user01';
+UPDATE MEMBER SET ENABLED=0 WHERE USERNAME='user01';
+
+
+SELECT * FROM MEMBER WHERE USERNAME='del01' AND EMAIL='del01@naver.com';
